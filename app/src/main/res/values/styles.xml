@@ -33,9 +33,9 @@
         <item name="buttonBarNegativeButtonStyle">@style/Widget.Button.TextButton.Dialog.FullWidth</item>
         <item name="buttonBarNeutralButtonStyle">@style/Widget.Button.TextButton.Dialog.FullWidth</item>
     </style>
-</resources>
 
     <style name="TabTextAppearance" parent="TextAppearance.Design.Tab">
         <item name="android:textSize">12sp</item>
         <item name="android:textStyle">bold</item>
     </style>
+</resources>
