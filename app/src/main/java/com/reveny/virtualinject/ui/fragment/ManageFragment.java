@@ -166,12 +166,19 @@ public class ManageFragment extends BaseFragment {
     }
 
     private void doLaunch() {
-        boolean isInstalled = BlackBoxCore.get().isInstalled(packageName, 0);
-        if (!isInstalled) {
-            Toast.makeText(requireContext(), R.string.err_not_installed, Toast.LENGTH_SHORT).show();
-            return;
+        try {
+            boolean isInstalled = BlackBoxCore.get().isInstalled(packageName, 0);
+            if (!isInstalled) {
+                Toast.makeText(requireContext(), R.string.err_not_installed, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            boolean launched = BlackBoxCore.get().launchApk(packageName, 0);
+            if (!launched) {
+                Toast.makeText(requireContext(), "Gagal membuka app — coba install ulang", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
-        BlackBoxCore.get().launchApk(packageName, 0);
     }
 
     private void doDelete() {
