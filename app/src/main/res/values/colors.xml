@@ -1,10 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Legacy (keep to avoid compile errors) -->
     <color name="home_secondary_outline_ambient_shadow_color">@color/material_grey_500</color>
     <color name="home_secondary_outline_spot_shadow_color">@color/material_grey_300</color>
-
     <color name="primary_text_material_inverse">@color/abc_primary_text_material_dark</color>
     <color name="secondary_text_material_inverse">@color/abc_secondary_text_material_dark</color>
-
     <color name="primary_text_material">@color/abc_primary_text_material_light</color>
     <color name="secondary_text_material">@color/abc_secondary_text_material_light</color>
+
+    <!-- Virtual Inject Dark UI palette -->
+    <color name="vi_bg">#0C0C12</color>
+    <color name="vi_surface">#111120</color>
+    <color name="vi_surface2">#131322</color>
+    <color name="vi_border">#1A1A2E</color>
+    <color name="vi_divider">#1C1C2C</color>
+    <color name="vi_accent">#7C6FFF</color>
+    <color name="vi_accent_dim">#1E1A40</color>
+    <color name="vi_accent_light">#A89CFF</color>
+    <color name="vi_text_primary">#EDEDF5</color>
+    <color name="vi_text_secondary">#8888AA</color>
+    <color name="vi_text_hint">#555566</color>
+    <color name="vi_green">#4CAF50</color>
+    <color name="vi_green_dim">#0D1F0D</color>
+    <color name="vi_red">#FF5555</color>
+    <color name="vi_red_dim">#1A0E0E</color>
+    <color name="vi_icon_tint">#EDEDF5</color>
+    <color name="vi_clone_dot">#7C6FFF</color>
+    <color name="vi_tab_indicator">#7C6FFF</color>
+    <color name="vi_search_bg">#111120</color>
 </resources>

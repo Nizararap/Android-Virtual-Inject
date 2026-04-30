@@ -1,223 +1,171 @@
 package com.reveny.virtualinject.ui.fragment;
 
-import android.app.Activity;
-import android.app.Dialog;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.text.method.LinkMovementMethod;
-import android.util.Log;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Toast;
-import android.content.Intent;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatDelegate;
-import androidx.core.text.HtmlCompat;
-import androidx.fragment.app.DialogFragment;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import com.reveny.virtualinject.BuildConfig;
+import com.google.android.material.tabs.TabLayout;
 import com.reveny.virtualinject.R;
-import com.reveny.virtualinject.databinding.DialogAboutBinding;
-import com.reveny.virtualinject.databinding.FragmentHomeBinding;
-import com.reveny.virtualinject.ui.dialog.BlurBehindDialogBuilder;
+import com.reveny.virtualinject.adapter.AppGridAdapter;
+import com.reveny.virtualinject.adapter.ClonedAppsAdapter;
+import com.reveny.virtualinject.model.AppItem;
+import com.reveny.virtualinject.model.CloneConfig;
+import com.reveny.virtualinject.store.CloneStore;
 import com.reveny.virtualinject.util.Utility;
-import com.reveny.virtualinject.util.chrome.LinkTransformationMethod;
-import com.vcore.BlackBoxCore;
+import com.reveny.virtualinject.ui.activity.MainActivity;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
-
-import rikka.material.app.LocaleDelegate;
+import java.util.Set;
 
 public class HomeFragment extends BaseFragment {
-    private static final String TAG = "VirtualInjectLog";
 
-    private String selectedApp;
-    private String libraryPath;
+    private AppGridAdapter gridAdapter;
+    private ClonedAppsAdapter clonedAdapter;
+    private RecyclerView rvAll, rvCloned;
+    private LinearLayout emptyCloned, searchBar;
+    private TextView emptySearch, headerSubtitle, btnGoAdd, searchClear;
+    private EditText searchInput;
+    private TabLayout tabLayout;
 
-    private FragmentHomeBinding binding;
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    @Nullable @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        View root = inflater.inflate(R.layout.fragment_home, container, false);
+        bindViews(root);
+        setupTabs();
+        setupSearch();
+        setupAllAppsGrid();
+        setupClonedList();
+        loadApps();
+        return root;
     }
 
-    @Override
-    public void onPrepareOptionsMenu(Menu menu) {
-        menu.findItem(R.id.about).setOnMenuItemClickListener(item -> {
-            showAbout();
-            return true;
+    private void bindViews(View root) {
+        tabLayout    = root.findViewById(R.id.tab_layout);
+        rvAll        = root.findViewById(R.id.rv_all_apps);
+        rvCloned     = root.findViewById(R.id.rv_cloned_apps);
+        emptyCloned  = root.findViewById(R.id.empty_cloned);
+        emptySearch  = root.findViewById(R.id.empty_search);
+        searchBar    = root.findViewById(R.id.search_bar);
+        searchInput  = root.findViewById(R.id.search_input);
+        searchClear  = root.findViewById(R.id.search_clear);
+        headerSubtitle = root.findViewById(R.id.header_subtitle);
+        btnGoAdd     = root.findViewById(R.id.btn_go_add);
+    }
+
+    private void setupTabs() {
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.tab_all_apps));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.tab_cloned));
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override public void onTabSelected(TabLayout.Tab tab) {
+                boolean isAll = tab.getPosition() == 0;
+                rvAll.setVisibility(isAll ? View.VISIBLE : View.GONE);
+                searchBar.setVisibility(isAll ? View.VISIBLE : View.GONE);
+                refreshClonedTab(!isAll);
+                if (isAll) {
+                    headerSubtitle.setText("Tap app untuk di-clone");
+                } else {
+                    int cnt = CloneStore.get(requireContext()).getAllClones().size();
+                    headerSubtitle.setText(cnt + " app ter-clone");
+                }
+            }
+            @Override public void onTabUnselected(TabLayout.Tab tab) {}
+            @Override public void onTabReselected(TabLayout.Tab tab) {}
         });
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode != 1 || resultCode != Activity.RESULT_OK) {
-            return;
-        }
-
-        if (data == null || data.getData() == null) {
-            Toast.makeText(getActivity(), "File selection failed", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        Uri fileUri = data.getData();
-
-        if (fileUri != null && fileUri.getPath() != null && fileUri.getPath().endsWith(".so")) {
-            libraryPath = Objects.requireNonNull(fileUri.getPath()).replace("/document/primary:", Environment.getExternalStorageDirectory().getPath() + "/");
-            Toast.makeText(getActivity(), "File Selected: " + libraryPath, Toast.LENGTH_LONG).show();
-
-            // Define destination file in cache directory
-            File dest = new File(requireContext().getCacheDir(), "libinject.so");
-
-            try (InputStream inputStream = requireContext().getContentResolver().openInputStream(fileUri);
-                 OutputStream outputStream = new FileOutputStream(dest)) {
-
-                // Copy the file content from InputStream to OutputStream
-                byte[] buffer = new byte[1024];
-                int bytesRead;
-                while ((bytesRead = inputStream.read(buffer)) != -1) {
-                    outputStream.write(buffer, 0, bytesRead);
-                }
-
-                Log.i(TAG, "Copied library file to: " + dest.getAbsolutePath());
-                binding.libPath.setText(libraryPath);
-
-            } catch (IOException e) {
-                Log.e(TAG, "Failed to copy library file", e);
-                Toast.makeText(getActivity(), "Failed to copy library file", Toast.LENGTH_SHORT).show();
-                e.printStackTrace();
+    private void setupSearch() {
+        searchInput.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                gridAdapter.filter(s.toString());
+                searchClear.setVisibility(s.length() > 0 ? View.VISIBLE : View.GONE);
+                emptySearch.setVisibility(gridAdapter.getVisibleCount() == 0 ? View.VISIBLE : View.GONE);
             }
+            @Override public void afterTextChanged(Editable s) {}
+        });
+        searchClear.setOnClickListener(v -> searchInput.setText(""));
+    }
+
+    private void setupAllAppsGrid() {
+        gridAdapter = new AppGridAdapter();
+        gridAdapter.setOnAppClickListener(app -> navigateToCloneOrManage(app));
+        rvAll.setLayoutManager(new GridLayoutManager(requireContext(), 4));
+        rvAll.setAdapter(gridAdapter);
+    }
+
+    private void setupClonedList() {
+        clonedAdapter = new ClonedAppsAdapter(requireContext().getPackageManager());
+        clonedAdapter.setOnItemClickListener(config -> {
+            AppItem appItem = Utility.getAppItem(requireContext(), config.getPackageName());
+            if (appItem != null) navigateToManage(appItem, config);
+        });
+        rvCloned.setLayoutManager(new LinearLayoutManager(requireContext()));
+        rvCloned.setAdapter(clonedAdapter);
+        btnGoAdd.setOnClickListener(v -> tabLayout.selectTab(tabLayout.getTabAt(0)));
+    }
+
+    private void loadApps() {
+        new Thread(() -> {
+            List<AppItem> apps = Utility.getInstalledAppItems(requireContext());
+            requireActivity().runOnUiThread(() -> {
+                gridAdapter.setApps(apps);
+                refreshClonedDots();
+            });
+        }).start();
+    }
+
+    public void refreshClonedDots() {
+        if (gridAdapter == null) return;
+        List<CloneConfig> clones = CloneStore.get(requireContext()).getAllClones();
+        Set<String> pkgs = new HashSet<>();
+        for (CloneConfig c : clones) pkgs.add(c.getPackageName());
+        gridAdapter.setClonedPackages(pkgs);
+    }
+
+    private void refreshClonedTab(boolean show) {
+        if (!show) { rvCloned.setVisibility(View.GONE); emptyCloned.setVisibility(View.GONE); return; }
+        List<CloneConfig> clones = CloneStore.get(requireContext()).getAllClones();
+        clonedAdapter.setData(clones);
+        if (clones.isEmpty()) {
+            rvCloned.setVisibility(View.GONE);
+            emptyCloned.setVisibility(View.VISIBLE);
         } else {
-            Toast.makeText(getActivity(), "Invalid file type selected. Please select a .so or .dex file.", Toast.LENGTH_SHORT).show();
+            rvCloned.setVisibility(View.VISIBLE);
+            emptyCloned.setVisibility(View.GONE);
         }
     }
 
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        binding = FragmentHomeBinding.inflate(inflater, container, false);
-        setupToolbar(binding.toolbar, null, R.string.app_name, R.menu.menu_home);
-        binding.toolbar.setNavigationIcon(null);
-        binding.toolbar.setOnClickListener(null);
-        binding.appBar.setLiftable(true);
-        binding.nestedScrollView.getBorderViewDelegate().setBorderVisibilityChangedListener((top, oldTop, bottom, oldBottom) -> binding.appBar.setLifted(!top));
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-
-        setupApplist();
-
-        binding.libPathChoose.setEndIconOnClickListener(v -> {
-            Intent chooseFile = new Intent(Intent.ACTION_GET_CONTENT);
-            chooseFile.setType("*/*");
-
-            // For .so
-            chooseFile.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"application/octet-stream"});
-            chooseFile = Intent.createChooser(chooseFile, "Choose a .so file");
-            startActivityForResult(chooseFile, 1);
-        });
-
-        binding.installButton.setOnClickListener(v -> {
-            if (selectedApp != null) {
-                Log.i(TAG, "Installing: " + selectedApp);
-                BlackBoxCore.get().installPackageAsUser(selectedApp, 0);
-
-                boolean isInstalled = BlackBoxCore.get().isInstalled(selectedApp, 0);
-                Log.i(TAG, "isInstalled: " + isInstalled);
-                if (!isInstalled) {
-                    Toast.makeText(requireContext(), "Failed to install", Toast.LENGTH_SHORT).show();
-                }
-
-                Toast.makeText(requireContext(), "Installed", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(requireContext(), "Please select an app", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        binding.launchButton.setOnClickListener(v -> {
-            if (selectedApp != null && libraryPath != null) {
-                boolean isInstalled = BlackBoxCore.get().isInstalled(selectedApp, 0);
-                if (!isInstalled) {
-                    Toast.makeText(requireContext(), "Please install the app first", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                Log.i(TAG, "Launching: " + selectedApp);
-                BlackBoxCore.get().launchApk(selectedApp, 0);
-            } else {
-                Toast.makeText(requireContext(), "Please select a valid app and library path", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        return binding.getRoot();
-    }
-
-    private void setupApplist() {
-        List<String> installedApps = Utility.getInstalledApps(requireContext());
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-            requireContext(),
-            android.R.layout.simple_dropdown_item_1line,
-            installedApps
-        );
-        binding.appSelectorText.setAdapter(adapter);
-
-        binding.appSelectorText.setOnItemClickListener((parent, view, position, id) -> {
-            String selected = (String) parent.getItemAtPosition(position);
-            selectedApp = selected;
-            Log.i(TAG, "Selected: " + selected);
-        });
-        binding.appSelectorText.setOnFocusChangeListener((view, hasFocus) -> {
-            if (hasFocus) return;
-
-            String currText = binding.appSelectorText.getText().toString();
-            if (installedApps.stream().noneMatch(c -> c.equals(currText))) {
-                binding.appSelectorText.setText("");
-                selectedApp = null;
-            }
-        });
-    }
-
-    public static class AboutDialog extends DialogFragment {
-        @NonNull
-        @Override
-        public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-            DialogAboutBinding binding = DialogAboutBinding.inflate(getLayoutInflater(), null, false);
-            setupAboutDialog(binding);
-            return new BlurBehindDialogBuilder(requireContext()).setView(binding.getRoot()).create();
-        }
-
-        private void setupAboutDialog(DialogAboutBinding binding) {
-            binding.designAboutTitle.setText(R.string.app_name);
-            binding.designAboutInfo.setMovementMethod(LinkMovementMethod.getInstance());
-            binding.designAboutInfo.setTransformationMethod(new LinkTransformationMethod(requireActivity()));
-            binding.designAboutInfo.setText(HtmlCompat.fromHtml(getString(
-                    R.string.about_view_source_code,
-                    "<b><a href=\"https://t.me/revenyy\">Telegram</a></b>",
-                    "<b><a href=\"https://github.com/reveny/\">Reveny</a></b>"), HtmlCompat.FROM_HTML_MODE_LEGACY));
-            binding.designAboutVersion.setText(String.format(LocaleDelegate.getDefaultLocale(), "%s (%d)", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE));
+    private void navigateToCloneOrManage(AppItem app) {
+        CloneConfig existing = CloneStore.get(requireContext()).getConfig(app.getPackageName());
+        if (existing != null) {
+            navigateToManage(app, existing);
+        } else {
+            CloneSetupFragment frag = CloneSetupFragment.newInstance(app.getPackageName());
+            ((MainActivity) requireActivity()).pushFragment(frag);
         }
     }
 
-
-    private void showAbout() {
-        // Showing the About Dialog
-        new AboutDialog().show(getChildFragmentManager(), "about");
+    private void navigateToManage(AppItem app, CloneConfig config) {
+        ManageFragment frag = ManageFragment.newInstance(app.getPackageName());
+        ((MainActivity) requireActivity()).pushFragment(frag);
     }
 
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
+    @Override public void onResume() {
+        super.onResume();
+        refreshClonedDots();
     }
 }

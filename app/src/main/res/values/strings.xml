@@ -2,4 +2,63 @@
     <string name="app_name">Virtual Inject</string>
     <string name="about_view_source_code"><![CDATA[<br>Join our %1$s channel<br/><br>Copyright © %2$s<br/>]]></string>
     <string name="About">About</string>
+
+    <!-- Home -->
+    <string name="tab_all_apps">Semua App</string>
+    <string name="tab_cloned">Clone Saya</string>
+    <string name="search_hint">Cari aplikasi…</string>
+    <string name="empty_cloned">Belum ada app yang di-clone</string>
+    <string name="add_app">+ Tambah App</string>
+    <string name="clone_dot_desc">Sudah di-clone</string>
+    <string name="no_result">Aplikasi tidak ditemukan</string>
+
+    <!-- Clone Setup -->
+    <string name="clone_setup_title">Clone App</string>
+    <string name="lib_injection_title">Library Injection (.so)</string>
+    <string name="lib_injection_desc">Disimpan permanen — tidak perlu pilih ulang setiap launch</string>
+    <string name="option_no_lib">Tanpa Library</string>
+    <string name="option_no_lib_sub">Clone standar, bisa tambah .so nanti</string>
+    <string name="option_with_lib">Dengan Library</string>
+    <string name="option_with_lib_sub">Inject .so otomatis setiap launch</string>
+    <string name="pick_so_file">Pilih file .so…</string>
+    <string name="btn_clone">Clone %s</string>
+
+    <!-- Manage -->
+    <string name="manage_title">Kelola Clone</string>
+    <string name="lib_active_title">Library Aktif</string>
+    <string name="no_lib_active">Tidak ada library terpasang</string>
+    <string name="btn_change_so">Ganti .so</string>
+    <string name="btn_install_so">Pasang .so</string>
+    <string name="btn_reset_so">Reset .so</string>
+    <string name="btn_launch">Launch %s</string>
+    <string name="danger_zone">DANGER ZONE</string>
+    <string name="btn_delete_clone">Hapus Clone</string>
+    <string name="confirm_reset_title">Reset library?</string>
+    <string name="confirm_reset_msg">Library akan dihapus dari konfigurasi. App tetap bisa dijalankan tanpa inject.</string>
+    <string name="yes_reset">Ya, Reset</string>
+    <string name="cancel">Batal</string>
+
+    <!-- Progress -->
+    <string name="progress_installing">Menginstall…</string>
+    <string name="progress_step_env">Menyiapkan environment virtual…</string>
+    <string name="progress_step_pkg">Menginstall package…</string>
+    <string name="progress_step_so">Menyuntikkan library .so…</string>
+    <string name="progress_step_verify">Verifikasi integritas…</string>
+    <string name="progress_step_done">Selesai!</string>
+    <string name="done_title">Berhasil di-clone!</string>
+    <string name="done_hint">💡 Ganti atau reset .so kapanpun lewat menu app</string>
+    <string name="btn_launch_now">🚀 Launch Sekarang</string>
+    <string name="btn_see_clones">Lihat Clone Saya</string>
+    <string name="lib_active_fmt">💉 Library aktif: %s</string>
+    <string name="no_lib_active_short">Tanpa library injection</string>
+
+    <!-- Errors -->
+    <string name="err_install_failed">Gagal menginstall app</string>
+    <string name="err_not_installed">Install app terlebih dahulu</string>
+    <string name="err_select_app">Pilih app terlebih dahulu</string>
+    <string name="err_invalid_file">File tidak valid, pilih file .so</string>
+    <string name="err_copy_failed">Gagal menyalin library</string>
+    <string name="installed_ok">Berhasil diinstall</string>
+    <string name="clone_tag">CLONE</string>
+    <string name="so_none">Tanpa library</string>
 </resources>
