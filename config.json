@@ -1,9 +1,9 @@
 {
   "features": {
     "aimbot_allowed": false,
-    "radar_allowed": false,
-    "combo_allowed": false,
-    "esp_visual_allowed": false
+    "radar_allowed": true,
+    "combo_allowed": true,
+    "esp_visual_allowed": true
   },
   "vip_devices": [
     "MASUKKAN_DEVICE_ID_ANDA_DISINI",
