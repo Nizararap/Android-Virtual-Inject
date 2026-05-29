@@ -2,19 +2,19 @@
   "features": {
     "aimbot": true,
     "radar": true,
-    "combo": false,
+    "combo": true,
     "esp_circle": true,
     "esp_line": true,
     "esp_health": true,
-    "esp_cooldown": false,
+    "esp_cooldown": true,
     "esp_monster": true,
     "alert_monster_hp": true,
-    "alert_enemy_ulti": false,
+    "alert_enemy_ulti": true,
     "disable_shadows": true,
     "disable_aa": true,
     "ling": true,
     "retribution": true,
-    "lock_hero": false
+    "lock_hero": true
   },
   "vip_devices": [
     "253abce56212f83a",
