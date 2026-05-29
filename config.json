@@ -1,0 +1,12 @@
+{
+  "features": {
+    "aimbot_allowed": true,
+    "radar_allowed": true,
+    "combo_allowed": true,
+    "esp_visual_allowed": false
+  },
+  "vip_devices": [
+    "MASUKKAN_DEVICE_ID_ANDA_DISINI",
+    "DEVICE_ID_VIP_LAINNYA"
+  ]
+}
