@@ -1,8 +1,8 @@
 {
   "features": {
-    "aimbot_allowed": true,
-    "radar_allowed": true,
-    "combo_allowed": true,
+    "aimbot_allowed": false,
+    "radar_allowed": false,
+    "combo_allowed": false,
     "esp_visual_allowed": false
   },
   "vip_devices": [
