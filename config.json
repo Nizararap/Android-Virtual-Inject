@@ -1,7 +1,7 @@
 {
   "features": {
     "aimbot": true,
-    "radar": false,
+    "radar": true,
     "combo": false,
     "esp_circle": true,
     "esp_line": true,
